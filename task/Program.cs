@@ -1,29 +1,49 @@
+using DataLayer;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using task;
+using task.Model.Settings;
+using task.Repository;
+using task.Servicies;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+internal class Program
 {
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    options.IncludeXmlComments(xmlPath);
-});
-
-// builder.Services.AddHostedService<Worker>();
-
-var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    private static async Task Main(string[] args)
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-        options.RoutePrefix = string.Empty; 
-    });
-}
+       await CreateHostBuilder(args).Build().RunAsync();
+    }
 
-app.UseRouting();
-app.MapControllers(); // No authorization needed
-app.Run();
+    public static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        var builder = Host.CreateDefaultBuilder(args);
+        builder.UseWindowsService();
+        builder.ConfigureWebHostDefaults(webHostBuilder =>
+        {
+            webHostBuilder
+                .UseStartup<Startup>()
+                .UseKestrel();
+        });
+        builder.ConfigureServices((hostContext, services) =>
+        {
+            services.Configure<WorkerSettings>(hostContext.Configuration.GetSection("Worker"));
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen(options =>
+            {
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                options.IncludeXmlComments(xmlPath);
+            });
+
+            var postgrecs = hostContext.Configuration.GetConnectionString("DellinDictionaryConnection");
+            services.AddDbContextPool<DellinDictionaryDbContext>(options =>
+                options.UseNpgsql(postgrecs)
+            );
+
+            services.AddHostedService<Worker>();
+            services.AddScoped<IJsonRepository, JsonRepository>();
+            services.AddScoped<IDbRepository, EfRepository>();
+        });
+
+        return builder;
+    }
+}
