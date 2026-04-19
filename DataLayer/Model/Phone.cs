@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,4 +20,13 @@ namespace DataLayer.Model
 
         public Office Office { get; set; }
     }
+
+    public class PhoneConfiguration : IEntityTypeConfiguration<Phone>
+    {
+        public void Configure(EntityTypeBuilder<Phone> builder)
+        {
+            builder.Property(s => s.Id).ValueGeneratedOnAdd();
+        }
+    }
+
 }

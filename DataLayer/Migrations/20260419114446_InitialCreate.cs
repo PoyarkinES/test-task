@@ -15,18 +15,6 @@ namespace DataLayer.Migrations
                 name: "dbo");
 
             migrationBuilder.CreateTable(
-                name: "Coordinates",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Latitude = table.Column<double>(type: "double precision", nullable: false),
-                    Longitude = table.Column<double>(type: "double precision", nullable: false)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Offices",
                 schema: "dbo",
                 columns: table => new
@@ -48,6 +36,29 @@ namespace DataLayer.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Offices", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Coordinateses",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    OfficeId = table.Column<int>(type: "integer", nullable: false),
+                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Longitude = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Coordinateses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Coordinateses_Offices_OfficeId",
+                        column: x => x.OfficeId,
+                        principalSchema: "dbo",
+                        principalTable: "Offices",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -74,18 +85,24 @@ namespace DataLayer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Coordinateses_OfficeId",
+                schema: "dbo",
+                table: "Coordinateses",
+                column: "OfficeId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Phone_OfficeId",
                 schema: "dbo",
                 table: "Phone",
-                column: "OfficeId",
-                unique: true);
+                column: "OfficeId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Coordinates",
+                name: "Coordinateses",
                 schema: "dbo");
 
             migrationBuilder.DropTable(

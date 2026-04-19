@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -17,15 +19,20 @@ namespace DataLayer.Model
         public string? Uuid { get; set; }
         public OfficeType? Type { get; set; }
         public string CountryCode { get; set; }
-        [NotMapped]
-        public Coordinates Coordinates { get; set; }
         public string? AddressRegion { get; set; }
         public string? AddressCity { get; set; }
         public string? AddressStreet { get; set; }
         public string? AddressHouseNumber { get; set; }
         public int? AddressApartment { get; set; }
         public string WorkTime { get; set; }
-        public Phone Phones { get; set; }
-        public Office() { }
+        public ICollection<Phone>? Phones { get; set; }
+        public Coordinates Coordinates { get; set; }
+    }
+
+    public class OrderConfiguration : IEntityTypeConfiguration<Office>
+    {
+        public void Configure(EntityTypeBuilder<Office> builder)
+        {
+        }
     }
 }

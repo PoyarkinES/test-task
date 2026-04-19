@@ -24,13 +24,27 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Model.Coordinates", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
 
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
-                    b.ToTable("Coordinates", "dbo");
+                    b.Property<int>("OfficeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfficeId")
+                        .IsUnique();
+
+                    b.ToTable("Coordinateses", "dbo");
                 });
 
             modelBuilder.Entity("DataLayer.Model.Office", b =>
@@ -101,17 +115,27 @@ namespace DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OfficeId")
-                        .IsUnique();
+                    b.HasIndex("OfficeId");
 
                     b.ToTable("Phone", "dbo");
+                });
+
+            modelBuilder.Entity("DataLayer.Model.Coordinates", b =>
+                {
+                    b.HasOne("DataLayer.Model.Office", "Office")
+                        .WithOne("Coordinates")
+                        .HasForeignKey("DataLayer.Model.Coordinates", "OfficeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Office");
                 });
 
             modelBuilder.Entity("DataLayer.Model.Phone", b =>
                 {
                     b.HasOne("DataLayer.Model.Office", "Office")
-                        .WithOne("Phones")
-                        .HasForeignKey("DataLayer.Model.Phone", "OfficeId")
+                        .WithMany("Phones")
+                        .HasForeignKey("OfficeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -120,8 +144,10 @@ namespace DataLayer.Migrations
 
             modelBuilder.Entity("DataLayer.Model.Office", b =>
                 {
-                    b.Navigation("Phones")
+                    b.Navigation("Coordinates")
                         .IsRequired();
+
+                    b.Navigation("Phones");
                 });
 #pragma warning restore 612, 618
         }

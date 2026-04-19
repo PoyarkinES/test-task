@@ -5,12 +5,11 @@ using task.Repository;
 
 namespace task.Servicies;
 
-public class Worker(ILogger<Worker> logger, IOptions<WorkerSettings> wSettings) : BackgroundService
+public class Worker(ILogger<Worker> logger, IOptions<WorkerSettings> wSettings, IServiceScopeFactory serviceScopeFactory) : BackgroundService
 {
     private readonly ILogger<Worker> _logger = logger;
     private readonly WorkerSettings _wSettings = wSettings.Value;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    //private readonly IDbRepository _dbRepository = dbRepository;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -20,16 +19,24 @@ public class Worker(ILogger<Worker> logger, IOptions<WorkerSettings> wSettings) 
             {
                 var runat = _wSettings.RunAt;
 
-                if(runat.Hour == DateTime.Now.TimeOfDay.Hours)
-                {
-                    _logger.LogInformation($"Worker running at: {DateTimeOffset.Now}");
+                _logger.LogInformation($"Worker running at: {DateTimeOffset.Now}");
 
-                    await DoWorkAsync(stoppingToken);
+                await DoWorkAsync(stoppingToken);
 
-                    var waitTime = runat.ToTimeSpan() - DateTime.Now.TimeOfDay;
-                    _logger.LogInformation($"Worker stop at: {DateTimeOffset.Now} delay {waitTime}");
-                    await Task.Delay(waitTime, stoppingToken);
-                }
+                var waitTime =  runat.ToTimeSpan() - DateTime.Now.TimeOfDay;
+                _logger.LogInformation($"Worker stop at: {DateTimeOffset.Now} delay {waitTime}");
+                await Task.Delay(waitTime.Ticks < 0 ? waitTime.Add(TimeSpan.FromHours(24)) : waitTime, stoppingToken);
+
+                //if(runat.Hour == DateTime.Now.TimeOfDay.Hours)
+                //{
+                //    _logger.LogInformation($"Worker running at: {DateTimeOffset.Now}");
+
+                //    await DoWorkAsync(stoppingToken);
+
+                //    var waitTime = runat.ToTimeSpan() - DateTime.Now.TimeOfDay;
+                //    _logger.LogInformation($"Worker stop at: {DateTimeOffset.Now} delay {waitTime}");
+                //    await Task.Delay(waitTime, stoppingToken);
+                //}
             }
         }
     }
@@ -40,7 +47,7 @@ public class Worker(ILogger<Worker> logger, IOptions<WorkerSettings> wSettings) 
         {
             using var scope = _serviceScopeFactory.CreateScope();
             var dbRepository = scope.ServiceProvider.GetRequiredService<IDbRepository>();
-
+            dbRepository.ImportOfficess("task.files.terminals.json", stoppingToken);
         }, stoppingToken);
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataLayer.Model
+﻿namespace task.Model.Model
 {
     public class JsonDeserialize
     {
@@ -45,7 +39,7 @@ namespace DataLayer.Model
         public string longitude { get; set; }
         public bool isPVZ { get; set; }
         public bool cashOnDelivery { get; set; }
-        public phone[] phonesphone { get; set; }
+        public phone[] phones { get; set; }
         public bool storage { get; set; }
         public string mail { get; set; }
         public bool isOffice { get; set; }

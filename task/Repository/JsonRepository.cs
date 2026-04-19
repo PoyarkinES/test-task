@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using task.Model.Model;
 using task.Servicies;
 
 namespace task.Repository

@@ -35,13 +35,13 @@ internal class Program
             });
 
             var postgrecs = hostContext.Configuration.GetConnectionString("DellinDictionaryConnection");
-            services.AddDbContextPool<DellinDictionaryDbContext>(options =>
-                options.UseNpgsql(postgrecs)
+            services.AddDbContext<DellinDictionaryDbContext>(options =>
+                options.UseNpgsql(postgrecs, b=> b.MigrationsAssembly("DataLayer"))
             );
 
+            services.AddTransient<IJsonRepository, JsonRepository>();
+            services.AddTransient<IDbRepository, EfRepository>();
             services.AddHostedService<Worker>();
-            services.AddScoped<IJsonRepository, JsonRepository>();
-            services.AddScoped<IDbRepository, EfRepository>();
         });
 
         return builder;
