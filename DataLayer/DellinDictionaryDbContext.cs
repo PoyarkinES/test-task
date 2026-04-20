@@ -1,5 +1,6 @@
 ﻿using DataLayer.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml;
@@ -20,8 +21,13 @@ namespace DataLayer
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        { 
-                optionsBuilder.EnableSensitiveDataLogging(true);
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            //optionsBuilder.UseLoggerFactory(LoggerFactory.Create(builder =>
+            //{
+            //    builder.AddFilter(_ => false);
+            //}));
         }
     }
 }

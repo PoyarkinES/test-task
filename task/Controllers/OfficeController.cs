@@ -24,7 +24,7 @@ namespace task.Controllers
 
         [HttpGet]
         [Route("getall")]
-        public async Task<IEnumerable<Office>> GetOfficess(string addressCity, string addressRegion)
+        public async Task<IEnumerable<Office>> GetOfficess()
         {
             try
             {
@@ -38,8 +38,23 @@ namespace task.Controllers
         }
 
         [HttpGet]
-        [Route("findoffice/{addressCity}/{addressRegion}")]
-        public async Task<IEnumerable<Office>> FindListOfOffice(string addressCity, string addressRegion)
+        [Route("getall/{officessId}")]
+        public async Task<Office?> GetOfficessById(int officessId)
+        {
+            try
+            {
+                return await _dbRepository.GetOffice(officessId); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
+        }
+
+        [HttpGet]
+        [Route("findoffice")]
+        public async Task<IEnumerable<Office>> FindListOfOffice(string? addressCity, string? addressRegion)
         {
             try
             {
@@ -54,19 +69,19 @@ namespace task.Controllers
         }
 
         [HttpGet]
-        [Route("findcitycode/{addressCity}/{addressRegion}")]
-        public async Task<int> FindCityCode(string addressCity, string addressRegion)
+        [Route("findcitycode")]
+        public async Task<int> FindCityCode(string? addressCity, string? addressRegion)
         {
             try
             {
                 var result = await _dbRepository.FindCityCode(addressCity, addressRegion);
-                if (!result.Any())
+                if (result.Any())
                 {
                     _logger.LogError($"City code {result.Single()}");
                     return result.Single();
                 }
 
-                throw new Exception($"Dublicate city code {JsonSerializer.Serialize(result)}");
+                throw new Exception($"City code not found");
             }
             catch(Exception ex)
             {
@@ -75,6 +90,48 @@ namespace task.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("deleteAll")]
+        public async Task DeleteAll(CancellationToken stoppingToken)
+        {
+            try
+            {
+                await _dbRepository.DeleteOfficess(stoppingToken);
+                _logger.LogError("Все офисы удалены.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("deleteAll/{officeId}")]
+        public async Task DeleteById(int officeId, CancellationToken stoppingToken)
+        {
+            try
+            {
+                await _dbRepository.DeleteOfficess(officeId, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("deleteAll/officessesId")]
+        public async Task DeleteRangeId([FromBody]int[] officessesId, CancellationToken stoppingToken)
+        {
+            try
+            {
+                await _dbRepository.DeleteOfficess(officessesId, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+        }
 
         [HttpGet]
         [Route("getjson")]
